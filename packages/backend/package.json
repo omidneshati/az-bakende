@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.1.1",
+    "@prisma/client": "^6.0.1",
     "elysia": "latest"
   },
   "devDependencies": {
