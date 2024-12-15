@@ -1,6 +1,8 @@
 import { client, prisma } from "./client";
 import Elysia, { error, t } from "elysia";
 import createUser from "./db/user";
+import { Prisma } from "@prisma/client";
+import { PrismaErrorHandler } from "./db/PrismaErrorHandler";
 
 export const auth = new Elysia().group("/auth", (context) =>
   context
@@ -14,8 +16,7 @@ export const auth = new Elysia().group("/auth", (context) =>
           createUser(user);
           return { message: "Register successful" };
         } catch (err) {
-          console.error(err);
-          return error(401, { error: "User Email not Valid" });
+          return PrismaErrorHandler(err);
         }
       },
       {
@@ -37,21 +38,17 @@ export const auth = new Elysia().group("/auth", (context) =>
     .post(
       "/login",
       async ({ body }) => {
-        const user = await prisma.user.findUnique({
-          where: {
-            email: body.email,
-          },
-        });
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: body.email,
+            },
+          });
 
-        if (!user) {
-          error(404, "User not found");
+          return { message: "Login Successful" };
+        } catch (err) {
+          return PrismaErrorHandler(err);
         }
-
-        if (user?.password !== body.password) {
-          error(403, "Invalid password");
-        }
-
-        return { message: "Login Successful" };
       },
       {
         body: t.Object({
